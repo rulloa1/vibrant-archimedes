@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Project Controls — DunRite Construction Group</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Expanded:wght@600;700;800;900&family=Saira+Condensed:wght@600;700;800&family=Spline+Sans+Mono:wght@400;500;600&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="pages.css" />
+
+<style>
+/* ================================================================
+   Project Controls — page-specific styles
+   ================================================================ */
+
+/* ── page hero ── */
+.pc-hero {
+  background: var(--ink);
+  color: #fff;
+  padding: 56px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+.pc-hero::before {
+  content: "";
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 38px 38px;
+}
+.pc-hero-inner { position: relative; }
+.pc-hero h1 {
+  font-size: clamp(36px, 5.5vw, 72px);
+  text-transform: uppercase;
+  margin-top: 16px;
+  line-height: .96;
+}
+.pc-hero h1 span { color: var(--accent); }
+.pc-hero .sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .1em;
+  color: var(--concrete);
+  margin-top: 14px;
+}
+
+/* hero summary strip */
+.pc-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
+  margin-top: 48px;
+}
+.pc-stat {
+  padding: 28px 0 32px;
+  border-right: 1px solid var(--line);
+}
+.pc-stat:last-child { border-right: none; }
+.pc-stat .val {
+  font-family: var(--cond);
+  font-size: clamp(38px, 4.5vw, 58px);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.pc-stat .val .u { color: var(--accent); }
+.pc-stat .lbl {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  margin-top: 8px;
+}
+.pc-stat .delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: #4caf6e;
+  margin-top: 6px;
+}
+.pc-stat .delta.down { color: #e05252; }
+.pc-stat .delta svg { width: 12px; height: 12px; }
+@media (max-width: 760px) {
+  .pc-strip { grid-template-columns: repeat(2,1fr); }
+  .pc-stat:nth-child(2) { border-right: none; }
+  .pc-stat:nth-child(1),.pc-stat:nth-child(2) { border-bottom: 1px solid var(--line); }
+}
+
+/* ── toolbar ── */
+.pc-toolbar {
+  background: var(--char);
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 78px;
+  z-index: 40;
+}
+.pc-toolbar .wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.pc-toolbar .wrap::-webkit-scrollbar { display: none; }
+.pc-filter {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius);
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.pc-filter:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+.pc-filter.active { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tb-sep { flex: 1; min-width: 0; }
+.tb-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--radius);
+  padding: 0 12px;
+  height: 34px;
+}
+.tb-search svg { width: 14px; height: 14px; color: var(--concrete); flex-shrink: 0; }
+.tb-search input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: .06em;
+  width: 160px;
+}
+.tb-search input::placeholder { color: var(--concrete); }
+
+/* ── active projects table ── */
+.pc-projects { background: var(--paper); padding: clamp(48px, 6vw, 80px) 0; }
+.sec-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.sec-label::before { content: ""; width: 26px; height: 2px; background: var(--accent); }
+.sec-label::after  { content: ""; flex: 1; height: 1px; background: var(--line-dark); }
+.pc-table-wrap { overflow-x: auto; }
+table.pc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.pc-table th {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--ink);
+  white-space: nowrap;
+}
+.pc-table td {
+  padding: 16px 16px;
+  border-bottom: 1px solid var(--line-dark);
+  vertical-align: middle;
+}
+.pc-table tr:last-child td { border-bottom: none; }
+.pc-table tr:hover td { background: rgba(0,0,0,.03); }
+.proj-name {
+  font-family: var(--display);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  color: var(--ink);
+}
+.proj-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--concrete);
+  margin-top: 3px;
+}
+.badge-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge-status.active { background: rgba(76,175,110,.15); color: #2d8a4e; }
+.badge-status.pending { background: rgba(244,160,30,.15); color: #b87a0a; }
+.badge-status.bid { background: rgba(59,130,196,.15); color: #2563a0; }
+.badge-status.hold { background: rgba(126,130,132,.15); color: #555; }
+.badge-status.complete { background: rgba(0,0,0,.06); color: var(--concrete); }
+.prog-cell { min-width: 140px; }
+.prog-bar {
+  height: 4px;
+  background: var(--haze);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+.prog-fill.over { background: #e05252; }
+.prog-pct {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--concrete);
+}
+.val-cell {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.county-tag {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.row-action {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+  background: none;
+  border: 1px solid rgba(244,160,30,.3);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: all .18s;
+  white-space: nowrap;
+}
+.row-action:hover { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+@media (max-width: 860px) {
+  .pc-table td:nth-child(4), .pc-table th:nth-child(4),
+  .pc-table td:nth-child(5), .pc-table th:nth-child(5) { display: none; }
+}
+
+/* ── budget controls ── */
+.pc-budget { background: var(--char); color: #fff; padding: clamp(48px, 6vw, 80px) 0; }
+.pc-budget .sec-label::before { background: var(--accent); }
+.pc-budget .sec-label::after { background: rgba(255,255,255,.12); }
+.pc-budget .sec-label { color: var(--accent); }
+.budget-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 860px) { .budget-grid { grid-template-columns: 1fr; } }
+.budget-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.bc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+.bc-name {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.bc-sub {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  margin-top: 4px;
+}
+.bc-total {
+  font-family: var(--cond);
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+.bc-total .u { color: var(--accent); }
+.bc-rows { display: flex; flex-direction: column; gap: 14px; }
+.bc-row-item { }
+.bc-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.bc-cat {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete-2);
+}
+.bc-nums {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  letter-spacing: .04em;
+  color: var(--concrete);
+}
+.bc-nums .actual { color: #fff; font-weight: 600; }
+.bc-track {
+  height: 6px;
+  background: rgba(255,255,255,.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bc-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width .4s ease;
+}
+.bc-fill.budget-amber { background: var(--accent); }
+.bc-fill.budget-green { background: #4caf6e; }
+.bc-fill.budget-red   { background: #e05252; }
+.bc-fill.budget-blue  { background: #3b82c4; }
+
+/* variance callout */
+.bc-variance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+.bv-label {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.bv-val {
+  font-family: var(--cond);
+  font-size: 22px;
+  font-weight: 700;
+  color: #4caf6e;
+}
+.bv-val.over { color: #e05252; }
+
+/* ── dashboard split: schedule + bid queue ── */
+.pc-lower { background: var(--paper-2); padding: clamp(48px, 6vw, 80px) 0; }
+.lower-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 36px; }
+@media (max-width: 900px) { .lower-grid { grid-template-columns: 1fr; } }
+
+/* schedule / milestones */
+.pc-panel {
+  background: #fff;
+  border: 1px solid var(--line-dark);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.pn-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line-dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pn-title {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+.pn-pill {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  background: var(--haze);
+  color: var(--concrete);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+.milestone-list { padding: 6px 0; }
+.milestone {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line-dark);
+  transition: background .18s;
+}
+.milestone:last-child { border-bottom: none; }
+.milestone:hover { background: var(--paper); }
+.ms-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-align: center;
+  line-height: 1.3;
+}
+.ms-date .d { font-size: 22px; font-weight: 700; color: var(--accent-deep); line-height: 1; }
+.ms-date .m { text-transform: uppercase; color: var(--concrete); font-size: 10px; letter-spacing: .1em; }
+.ms-info { }
+.ms-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.ms-proj {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .07em;
+  color: var(--concrete);
+  margin-top: 3px;
+}
+.ms-type {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.ms-type.pour { background: rgba(244,160,30,.12); color: #b87a0a; }
+.ms-type.frame { background: rgba(59,130,196,.12); color: #1e5c96; }
+.ms-type.inspect { background: rgba(76,175,110,.12); color: #2d7a4a; }
+.ms-type.start { background: rgba(126,130,132,.12); color: var(--steel-2); }
+.ms-type.final { background: rgba(0,0,0,.06); color: var(--concrete); }
+
+/* bid queue */
+.bid-list { padding: 6px 0; }
+.bid-item {
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--line-dark);
+  transition: background .18s;
+}
+.bid-item:last-child { border-bottom: none; }
+.bid-item:hover { background: var(--paper); }
+.bid-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.bid-name {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.bid-amt {
+  font-family: var(--cond);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.bid-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.bid-county {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.bid-dline {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: var(--concrete);
+}
+.bid-dline.urgent { color: #e05252; font-weight: 600; }
+
+/* ── cta band ── */
+.pc-cta {
+  background: var(--accent);
+  padding: 52px 0;
+}
+.pc-cta .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.pc-cta h2 {
+  font-family: var(--display);
+  font-size: clamp(22px, 3vw, 36px);
+  text-transform: uppercase;
+  color: var(--on-accent);
+  margin: 0;
+}
+.pc-cta p {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: .04em;
+  color: rgba(26,18,5,.6);
+  margin: 8px 0 0;
+}
+.pc-cta .btn-dark { flex-shrink: 0; }
+
+/* ── reveal animation ── */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+/* ── gantt chart ── */
+.pc-gantt { background: var(--ink); color: #fff; padding: clamp(48px, 6vw, 80px) 0; }
+.pc-gantt .sec-label { color: var(--accent); }
+.pc-gantt .sec-label::before { background: var(--accent); }
+.pc-gantt .sec-label::after  { background: rgba(255,255,255,.12); }
+
+.gantt-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.gantt-wrap::-webkit-scrollbar { height: 4px; }
+.gantt-wrap::-webkit-scrollbar-track { background: rgba(255,255,255,.04); }
+.gantt-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 999px; }
+
+.gantt {
+  min-width: 840px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  font-family: var(--mono);
+}
+
+/* header row */
+.gantt-months {
+  position: relative;
+  height: 34px;
+  border-bottom: 1px solid rgba(255,255,255,.14);
+  overflow: hidden;
+}
+.gantt-months-label {
+  font-size: 10px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 8px;
+}
+.gantt-month {
+  position: absolute;
+  top: 0; bottom: 0;
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete-2);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  border-left: 1px solid rgba(255,255,255,.08);
+  box-sizing: border-box;
+}
+
+/* rows */
+.gantt-row {
+  display: contents;
+}
+.gantt-row:hover .gantt-label,
+.gantt-row:hover .gantt-track { background: rgba(255,255,255,.025); }
+
+.gantt-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12px 16px 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  min-height: 56px;
+  transition: background .15s;
+}
+.gl-name {
+  font-family: var(--display);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gl-type {
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  margin-top: 3px;
+  white-space: nowrap;
+}
+
+.gantt-track {
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  transition: background .15s;
+}
+/* column grid lines — 5 months */
+.gantt-track::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(255,255,255,.06) 0px,
+    rgba(255,255,255,.06) 1px,
+    transparent 1px,
+    transparent calc(100% / 5)
+  );
+  pointer-events: none;
+}
+
+/* the bar */
+.gantt-bar {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 22px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  cursor: default;
+}
+.gantt-bar .gb-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 2px 0 0 2px;
+  opacity: .55;
+}
+.gantt-bar .gb-label {
+  position: relative;
+  font-size: 9.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: rgba(255,255,255,.9);
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* bar colours by CSI phase */
+.gantt-bar { border-left: 2px solid; }
+.p-site      { background: rgba(244,160,30,.18); border-left-color: #f4a01e; }
+.p-structure { background: rgba(217,122,6,.22);  border-left-color: #d97a06; }
+.p-special   { background: rgba(59,130,196,.22); border-left-color: #3b82c4; }
+.p-mep       { background: rgba(76,175,110,.20); border-left-color: #4caf6e; }
+.p-framing   { background: rgba(155,160,165,.18);border-left-color: #9ba0a5; }
+.p-exterior  { background: rgba(200,160,80,.20); border-left-color: #c8a050; }
+.p-finishes  { background: rgba(155,93,229,.18); border-left-color: #9b5de5; }
+
+/* phase divider rows */
+.gantt-phase-hdr {
+  font-size: 9px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  padding: 14px 0 6px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  font-weight: 600;
+  align-self: end;
+}
+.gantt-phase-track {
+  position: relative;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: rgba(255,255,255,.02);
+}
+
+/* project info banner */
+.gantt-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 32px;
+  margin-bottom: 28px;
+  padding: 18px 22px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+}
+.gi-item { }
+.gi-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--concrete);
+  margin-bottom: 3px;
+}
+.gi-val {
+  font-family: var(--cond);
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: .01em;
+}
+.gi-val.accent { color: var(--accent); }
+.gi-val.warn   { color: #e05252; }
+
+/* CSI badge */
+.gl-csi {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .08em;
+  color: var(--concrete);
+  background: rgba(255,255,255,.06);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-right: 4px;
+}
+
+/* project start / completion markers */
+.gantt-marker {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  z-index: 6;
+  pointer-events: none;
+}
+.gantt-marker.mk-start { background: rgba(255,255,255,.25); }
+.gantt-marker.mk-end   { background: #e05252; }
+.gantt-marker::before {
+  content: attr(data-label);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  transform-origin: left center;
+  left: 4px;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: inherit;
+}
+
+/* milestone diamonds */
+.gantt-milestone {
+  position: absolute;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--accent);
+  transform: translateY(-50%) translateX(-50%) rotate(45deg);
+  z-index: 4;
+  cursor: default;
+}
+.gantt-milestone.ms-inspect { background: #4caf6e; }
+.gantt-milestone.ms-final   { background: #e05252; }
+.gantt-milestone.ms-start   { background: #3b82c4; }
+
+/* today line */
+.gantt-today {
+  position: absolute;
+  top: -10px; bottom: 0;
+  width: 1.5px;
+  background: var(--accent);
+  z-index: 5;
+  pointer-events: none;
+}
+.gantt-today::before {
+  content: "TODAY";
+  position: absolute;
+  top: 0;
+  left: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  color: var(--accent);
+}
+.gantt-today.no-label::before { display: none; }
+
+/* legend */
+.gantt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 22px;
+}
+.gl-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--concrete);
+}
+.gl-swatch {
+  width: 22px;
+  height: 6px;
+  border-radius: 2px;
+}
+.gl-diamond {
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+</style>
+</head>
+
+<body data-page="project-controls" data-hero="photo" data-texture="on" data-display="archivo" data-corners="sharp">
+
+<!-- ============ SITE HEADER (injected) ============ -->
+<div id="site-header"></div>
+
+<!-- ============ PAGE HERO ============ -->
+<section class="pc-hero blueprint">
+  <div class="wrap pc-hero-inner">
+    <div class="corner-spec">
+      FY 2026 · Q2<br />
+      LIC. <b>#CGC-FL</b> · INSURED<br />
+      CENTRAL FLORIDA · <b>10 COUNTIES</b>
+    </div>
+    <span class="eyebrow on-dark">DunRite Construction Group</span>
+    <h1 class="reveal in">Project <span>Controls</span></h1>
+    <p class="sub">Active jobs · Budget tracking · Bid pipeline · Schedule — updated daily</p>
+
+    <div class="pc-strip">
+      <div class="pc-stat">
+        <div class="val"><span>18</span></div>
+        <div class="lbl">Active Projects</div>
+        <div class="delta">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
+          +3 this quarter
+        </div>
+      </div>
+      <div class="pc-stat">
+        <div class="val"><span class="u">$</span><span>4.2</span><span class="u">M</span></div>
+        <div class="lbl">Work Under Contract</div>
+        <div class="delta">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
+          +12% vs prior quarter
+        </div>
+      </div>
+      <div class="pc-stat">
+        <div class="val"><span>7</span></div>
+        <div class="lbl">Bids Outstanding</div>
+        <div class="delta">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V2M2 6l4-4 4 4"/></svg>
+          <span class="u" style="color:inherit">$</span>2.8M pending
+        </div>
+      </div>
+      <div class="pc-stat">
+        <div class="val"><span>6</span></div>
+        <div class="lbl">Completed — Q2 2026</div>
+        <div class="delta down">
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v8M2 6l4 4 4-4"/></svg>
+          −1 vs target
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TOOLBAR ============ -->
+<div class="pc-toolbar">
+  <div class="wrap">
+    <button class="pc-filter active" onclick="filterProjects('all')">All</button>
+    <button class="pc-filter" onclick="filterProjects('active')">In Progress</button>
+    <button class="pc-filter" onclick="filterProjects('bid')">Bid Awarded</button>
+    <button class="pc-filter" onclick="filterProjects('pending')">Pending Start</button>
+    <button class="pc-filter" onclick="filterProjects('hold')">On Hold</button>
+    <button class="pc-filter" onclick="filterProjects('complete')">Completed</button>
+    <div class="tb-sep"></div>
+    <div class="tb-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search projects…" id="projSearch" oninput="searchProjects(this.value)" />
+    </div>
+  </div>
+</div>
+
+<!-- ============ ACTIVE PROJECTS TABLE ============ -->
+<section class="pc-projects">
+  <div class="wrap">
+    <div class="sec-label">Active &amp; Recent Projects</div>
+    <div class="pc-table-wrap reveal">
+      <table class="pc-table" id="projTable">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Type</th>
+            <th>County</th>
+            <th>Contract Value</th>
+            <th>Schedule</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- active -->
+          <tr data-status="active">
+            <td><div class="proj-name">Lakewood Reserve — Phase 2</div><div class="proj-sub">48-unit shell package · Hernando</div></td>
+            <td class="county-tag">Shell Pkg</td>
+            <td class="county-tag">Hernando</td>
+            <td class="val-cell">$680K</td>
+            <td class="county-tag" style="white-space:nowrap">Mar 3 – Aug 14</td>
+            <td class="prog-cell"><div class="prog-pct">62%</div><div class="prog-bar"><div class="prog-fill" style="width:62%"></div></div></td>
+            <td><span class="badge-status active">In Progress</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Lakewood Reserve — Phase 2')">View →</button></td>
+          </tr>
+          <tr data-status="active">
+            <td><div class="proj-name">Summertree Developer Slab</div><div class="proj-sub">32 slab pours · Pasco County</div></td>
+            <td class="county-tag">Slabs</td>
+            <td class="county-tag">Pasco</td>
+            <td class="val-cell">$310K</td>
+            <td class="county-tag" style="white-space:nowrap">Apr 1 – Jun 30</td>
+            <td class="prog-cell"><div class="prog-pct">84%</div><div class="prog-bar"><div class="prog-fill" style="width:84%"></div></div></td>
+            <td><span class="badge-status active">In Progress</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Summertree Developer Slab')">View →</button></td>
+          </tr>
+          <tr data-status="active">
+            <td><div class="proj-name">Citrus Highlands — Custom Shell</div><div class="proj-sub">4,200 sq ft custom home</div></td>
+            <td class="county-tag">Custom Shell</td>
+            <td class="county-tag">Citrus</td>
+            <td class="val-cell">$195K</td>
+            <td class="county-tag" style="white-space:nowrap">May 5 – Sep 20</td>
+            <td class="prog-cell"><div class="prog-pct">31%</div><div class="prog-bar"><div class="prog-fill" style="width:31%"></div></div></td>
+            <td><span class="badge-status active">In Progress</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Citrus Highlands — Custom Shell')">View →</button></td>
+          </tr>
+          <tr data-status="active">
+            <td><div class="proj-name">Suncoast Villas — Block &amp; Concrete</div><div class="proj-sub">Developer grade · 60 units</div></td>
+            <td class="county-tag">Dev Concrete</td>
+            <td class="county-tag">Hillsborough</td>
+            <td class="val-cell">$1.12M</td>
+            <td class="county-tag" style="white-space:nowrap">Jan 15 – Oct 1</td>
+            <td class="prog-cell"><div class="prog-pct">47%</div><div class="prog-bar"><div class="prog-fill" style="width:47%"></div></div></td>
+            <td><span class="badge-status active">In Progress</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Suncoast Villas — Block &amp; Concrete')">View →</button></td>
+          </tr>
+          <!-- bid awarded / pending -->
+          <tr data-status="bid">
+            <td><div class="proj-name">Marion Oaks Estate Shells</div><div class="proj-sub">8 custom shells · gated community</div></td>
+            <td class="county-tag">Shell Pkg</td>
+            <td class="county-tag">Marion</td>
+            <td class="val-cell">$540K</td>
+            <td class="county-tag" style="white-space:nowrap">Starts Jul 7</td>
+            <td class="prog-cell"><div class="prog-pct">0%</div><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+            <td><span class="badge-status bid">Bid Awarded</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Marion Oaks Estate Shells')">View →</button></td>
+          </tr>
+          <tr data-status="pending">
+            <td><div class="proj-name">Lake County Mixed-Use Slab</div><div class="proj-sub">Commercial grade · 18,000 sq ft</div></td>
+            <td class="county-tag">Slabs</td>
+            <td class="county-tag">Lake</td>
+            <td class="val-cell">$225K</td>
+            <td class="county-tag" style="white-space:nowrap">Starts Jul 21</td>
+            <td class="prog-cell"><div class="prog-pct">0%</div><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+            <td><span class="badge-status pending">Pending Start</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Lake County Mixed-Use Slab')">View →</button></td>
+          </tr>
+          <!-- on hold -->
+          <tr data-status="hold">
+            <td><div class="proj-name">Polk Commons — Phase 1</div><div class="proj-sub">Developer hold · permit delay</div></td>
+            <td class="county-tag">Dev Concrete</td>
+            <td class="county-tag">Polk</td>
+            <td class="val-cell">$890K</td>
+            <td class="county-tag" style="white-space:nowrap">TBD</td>
+            <td class="prog-cell"><div class="prog-pct">0%</div><div class="prog-bar"><div class="prog-fill" style="width:0%"></div></div></td>
+            <td><span class="badge-status hold">On Hold</span></td>
+            <td><button class="row-action" onclick="openProjectModal('Polk Commons — Phase 1')">View →</button></td>
+          </tr>
+          <!-- complete -->
+          <tr data-status="complete">
+            <td><div class="proj-name">Pasco Ridge — Shell Pkg A</div><div class="proj-sub">24 units · completed on schedule</div></td>
+            <td class="county-tag">Shell Pkg</td>
+            <td class="county-tag">Pasco</td>
+            <td class="val-cell">$415K</td>
+            <td class="county-tag" style="white-space:nowrap">Jan – Apr 2026</td>
+            <td class="prog-cell"><div class="prog-pct">100%</div><div class="prog-bar"><div class="prog-fill budget-green" style="width:100%"></div></div></td>
+            <td><span class="badge-status complete">Completed</span></td>
+            <td><button class="row-action">Archive</button></td>
+          </tr>
+          <tr data-status="complete">
+            <td><div class="proj-name">Hernando Flatwork — GC Contract</div><div class="proj-sub">Driveways, walks &amp; pads · 52 lots</div></td>
+            <td class="county-tag">Flatwork</td>
+            <td class="county-tag">Hernando</td>
+            <td class="val-cell">$182K</td>
+            <td class="county-tag" style="white-space:nowrap">Feb – May 2026</td>
+            <td class="prog-cell"><div class="prog-pct">100%</div><div class="prog-bar"><div class="prog-fill budget-green" style="width:100%"></div></div></td>
+            <td><span class="badge-status complete">Completed</span></td>
+            <td><button class="row-action">Archive</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BUDGET CONTROLS ============ -->
+<section class="pc-budget">
+  <div class="wrap">
+    <div class="sec-label">Budget Controls — Active Projects</div>
+    <div class="budget-grid">
+
+      <div class="budget-card reveal">
+        <div class="bc-head">
+          <div>
+            <div class="bc-name">Suncoast Villas</div>
+            <div class="bc-sub">Developer Concrete · Hillsborough</div>
+          </div>
+          <div class="bc-total"><span class="u">$</span>1.12M</div>
+        </div>
+        <div class="bc-rows">
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Concrete / Materials</span>
+              <span class="bc-nums"><span class="actual">$312K</span> / $380K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-amber" style="width:82%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Labor</span>
+              <span class="bc-nums"><span class="actual">$198K</span> / $410K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-green" style="width:48%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Equipment &amp; Rentals</span>
+              <span class="bc-nums"><span class="actual">$74K</span> / $110K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-amber" style="width:67%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Overhead &amp; Subs</span>
+              <span class="bc-nums"><span class="actual">$29K</span> / $220K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-blue" style="width:13%"></div></div>
+          </div>
+        </div>
+        <div class="bc-variance">
+          <span class="bv-label">Current Variance</span>
+          <span class="bv-val">+$107K under</span>
+        </div>
+      </div>
+
+      <div class="budget-card reveal">
+        <div class="bc-head">
+          <div>
+            <div class="bc-name">Lakewood Reserve Ph. 2</div>
+            <div class="bc-sub">Shell Package · Hernando</div>
+          </div>
+          <div class="bc-total"><span class="u">$</span>680K</div>
+        </div>
+        <div class="bc-rows">
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Block &amp; Materials</span>
+              <span class="bc-nums"><span class="actual">$228K</span> / $290K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-amber" style="width:79%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Labor</span>
+              <span class="bc-nums"><span class="actual">$165K</span> / $240K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-green" style="width:69%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Equipment</span>
+              <span class="bc-nums"><span class="actual">$48K</span> / $60K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-red" style="width:80%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Overhead &amp; Contingency</span>
+              <span class="bc-nums"><span class="actual">$11K</span> / $90K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-blue" style="width:12%"></div></div>
+          </div>
+        </div>
+        <div class="bc-variance">
+          <span class="bv-label">Current Variance</span>
+          <span class="bv-val">+$48K under</span>
+        </div>
+      </div>
+
+      <div class="budget-card reveal">
+        <div class="bc-head">
+          <div>
+            <div class="bc-name">Summertree Slab Pour</div>
+            <div class="bc-sub">32 Slab Pours · Pasco</div>
+          </div>
+          <div class="bc-total"><span class="u">$</span>310K</div>
+        </div>
+        <div class="bc-rows">
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Concrete</span>
+              <span class="bc-nums"><span class="actual">$147K</span> / $165K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-red" style="width:89%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Labor</span>
+              <span class="bc-nums"><span class="actual">$76K</span> / $90K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-amber" style="width:84%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Equipment</span>
+              <span class="bc-nums"><span class="actual">$18K</span> / $20K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-red" style="width:90%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Overhead</span>
+              <span class="bc-nums"><span class="actual">$8K</span> / $35K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-blue" style="width:23%"></div></div>
+          </div>
+        </div>
+        <div class="bc-variance">
+          <span class="bv-label">Current Variance</span>
+          <span class="bv-val over">−$14K over</span>
+        </div>
+      </div>
+
+      <div class="budget-card reveal">
+        <div class="bc-head">
+          <div>
+            <div class="bc-name">Citrus Highlands Shell</div>
+            <div class="bc-sub">Custom Home · Citrus County</div>
+          </div>
+          <div class="bc-total"><span class="u">$</span>195K</div>
+        </div>
+        <div class="bc-rows">
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Block &amp; Materials</span>
+              <span class="bc-nums"><span class="actual">$28K</span> / $88K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-green" style="width:32%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Labor</span>
+              <span class="bc-nums"><span class="actual">$22K</span> / $72K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-green" style="width:31%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Equipment</span>
+              <span class="bc-nums"><span class="actual">$8K</span> / $18K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-amber" style="width:44%"></div></div>
+          </div>
+          <div class="bc-row-item">
+            <div class="bc-row-top">
+              <span class="bc-cat">Overhead &amp; Contingency</span>
+              <span class="bc-nums"><span class="actual">$2K</span> / $17K</span>
+            </div>
+            <div class="bc-track"><div class="bc-fill budget-blue" style="width:12%"></div></div>
+          </div>
+        </div>
+        <div class="bc-variance">
+          <span class="bv-label">Current Variance</span>
+          <span class="bv-val">+$60K under</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ GANTT CHART ============ -->
+<section class="pc-gantt">
+  <div class="wrap">
+    <div class="sec-label">Longleaf Amenity Center — Schedule Gantt</div>
+
+    <div class="gantt-info reveal">
+      <div class="gi-item"><div class="gi-label">Project</div><div class="gi-val">Longleaf Amenity Center</div></div>
+      <div class="gi-item"><div class="gi-label">Contract Value</div><div class="gi-val accent">$1,350,000</div></div>
+      <div class="gi-item"><div class="gi-label">Project Start</div><div class="gi-val">Aug 15, 2026</div></div>
+      <div class="gi-item"><div class="gi-label">Substantial Completion</div><div class="gi-val">Dec 15, 2026</div></div>
+      <div class="gi-item"><div class="gi-label">Permit Status</div><div class="gi-val warn">Pending</div></div>
+      <div class="gi-item"><div class="gi-label">Project Manager</div><div class="gi-val">Michael E. Chandler</div></div>
+    </div>
+
+    <div class="gantt-wrap reveal">
+      <div class="gantt" id="ganttChart">
+        <!-- header: label spacer + month columns -->
+        <div class="gantt-months-label">Trade / CSI</div>
+        <div class="gantt-months" id="ganttMonths"></div>
+        <!-- rows injected by JS -->
+      </div>
+    </div>
+
+    <div class="gantt-legend">
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(244,160,30,.5);border-left:2px solid #f4a01e"></div>Site Work</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(217,122,6,.5);border-left:2px solid #d97a06"></div>Concrete / Masonry / Steel</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(59,130,196,.5);border-left:2px solid #3b82c4"></div>Special Construction</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(76,175,110,.5);border-left:2px solid #4caf6e"></div>MEP</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(155,160,165,.45);border-left:2px solid #9ba0a5"></div>Wood / Framing</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(200,160,80,.5);border-left:2px solid #c8a050"></div>Thermal / Exterior</div>
+      <div class="gl-item"><div class="gl-swatch" style="background:rgba(155,93,229,.5);border-left:2px solid #9b5de5"></div>Finishes</div>
+      <div class="gl-item"><div class="gl-diamond" style="background:#3b82c4"></div>Project Start</div>
+      <div class="gl-item"><div class="gl-diamond" style="background:#e05252"></div>Substantial Completion</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCHEDULE + BID QUEUE ============ -->
+<section class="pc-lower">
+  <div class="wrap">
+    <div class="lower-grid">
+
+      <!-- upcoming milestones -->
+      <div>
+        <div class="sec-label" style="margin-bottom:20px;">Upcoming Milestones</div>
+        <div class="pc-panel reveal">
+          <div class="pn-head">
+            <span class="pn-title">Schedule — June / July 2026</span>
+            <span class="pn-pill">Next 45 days</span>
+          </div>
+          <div class="milestone-list">
+            <div class="milestone">
+              <div class="ms-date"><div class="d">19</div><div class="m">Jun</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Final Pour — Lots 18–24</div>
+                <div class="ms-proj">Summertree Developer Slab · Pasco</div>
+              </div>
+              <span class="ms-type pour">Pour</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">23</div><div class="m">Jun</div></div>
+              <div class="ms-info">
+                <div class="ms-name">County Inspection — Framing</div>
+                <div class="ms-proj">Suncoast Villas Phase A · Hillsborough</div>
+              </div>
+              <span class="ms-type inspect">Inspect</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">30</div><div class="m">Jun</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Summertree Slab — Contract Closeout</div>
+                <div class="ms-proj">32 Lots Complete · Final Walkthroughs</div>
+              </div>
+              <span class="ms-type final">Final</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">7</div><div class="m">Jul</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Marion Oaks — Site Mobilization</div>
+                <div class="ms-proj">Marion Oaks Estate Shells · Marion</div>
+              </div>
+              <span class="ms-type start">Start</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">14</div><div class="m">Jul</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Block Wall — Sections C &amp; D</div>
+                <div class="ms-proj">Suncoast Villas · Hillsborough</div>
+              </div>
+              <span class="ms-type frame">Frame</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">21</div><div class="m">Jul</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Lake County Mixed-Use — Mobilize</div>
+                <div class="ms-proj">Commercial Slab · Lake County</div>
+              </div>
+              <span class="ms-type start">Start</span>
+            </div>
+            <div class="milestone">
+              <div class="ms-date"><div class="d">14</div><div class="m">Aug</div></div>
+              <div class="ms-info">
+                <div class="ms-name">Lakewood Reserve Ph. 2 — Final</div>
+                <div class="ms-proj">48-Unit Shell Package · Hernando</div>
+              </div>
+              <span class="ms-type final">Final</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- bid queue -->
+      <div>
+        <div class="sec-label" style="margin-bottom:20px;">Bid Pipeline</div>
+        <div class="pc-panel reveal">
+          <div class="pn-head">
+            <span class="pn-title">Outstanding Bids</span>
+            <span class="pn-pill">7 open · $2.8M</span>
+          </div>
+          <div class="bid-list">
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Manatee Crossings — Dev Shells</div>
+                <div class="bid-amt">$780K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Manatee</span>
+                <span class="badge-status bid" style="font-size:9px;padding:3px 8px;">Bid Submitted</span>
+                <span class="bid-dline urgent">Due Jun 20</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Sumter Ridge — 60-Lot Slab</div>
+                <div class="bid-amt">$490K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Sumter</span>
+                <span class="badge-status pending" style="font-size:9px;padding:3px 8px;">Review</span>
+                <span class="bid-dline urgent">Due Jun 24</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Pinellas Custom Shell Package</div>
+                <div class="bid-amt">$310K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Pinellas</span>
+                <span class="badge-status bid" style="font-size:9px;padding:3px 8px;">Bid Submitted</span>
+                <span class="bid-dline">Due Jul 5</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Hillsborough Dev Concrete — Ph. 3</div>
+                <div class="bid-amt">$615K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Hillsborough</span>
+                <span class="badge-status pending" style="font-size:9px;padding:3px 8px;">Estimating</span>
+                <span class="bid-dline">Due Jul 11</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Decorative Concrete — HOA Entrance</div>
+                <div class="bid-amt">$68K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Pasco</span>
+                <span class="badge-status bid" style="font-size:9px;padding:3px 8px;">Bid Submitted</span>
+                <span class="bid-dline">Due Jul 15</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Marion County — Community Shells</div>
+                <div class="bid-amt">$340K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Marion</span>
+                <span class="badge-status pending" style="font-size:9px;padding:3px 8px;">Estimating</span>
+                <span class="bid-dline">Due Jul 22</span>
+              </div>
+            </div>
+            <div class="bid-item">
+              <div class="bid-top">
+                <div class="bid-name">Citrus County — Block Wall Contract</div>
+                <div class="bid-amt">$197K</div>
+              </div>
+              <div class="bid-meta">
+                <span class="bid-county">Citrus</span>
+                <span class="badge-status pending" style="font-size:9px;padding:3px 8px;">Estimating</span>
+                <span class="bid-dline">Due Aug 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA BAND ============ -->
+<section class="pc-cta">
+  <div class="wrap">
+    <div>
+      <h2>Need a Bid on Your Next Project?</h2>
+      <p>Submit your project specs and a DunRite estimator will respond within one business day.</p>
+    </div>
+    <a class='btn btn-dark' href='/contact'>Request a Free Quote <span class="arr">→</span></a>
+  </div>
+</section>
+
+<!-- ============ SITE FOOTER (injected) ============ -->
+<div id="site-footer"></div>
+
+<!-- Scripts -->
+<script src="partials-standalone.js"></script>
+<script src="app.js"></script>
+
+<script>
+/* ── filter + search ── */
+var currentFilter = 'all';
+
+function filterProjects(status) {
+  currentFilter = status;
+  document.querySelectorAll('.pc-filter').forEach(function(b) {
+    b.classList.toggle('active', b.getAttribute('onclick').includes("'" + status + "'"));
+  });
+  applyFilters();
+}
+
+function searchProjects(q) {
+  applyFilters(q);
+}
+
+function applyFilters(q) {
+  var query = (q !== undefined ? q : document.getElementById('projSearch').value).toLowerCase().trim();
+  document.querySelectorAll('#projTable tbody tr').forEach(function(row) {
+    var st = row.getAttribute('data-status');
+    var text = row.textContent.toLowerCase();
+    var matchStatus = currentFilter === 'all' || st === currentFilter;
+    var matchQuery = !query || text.indexOf(query) !== -1;
+    row.style.display = (matchStatus && matchQuery) ? '' : 'none';
+  });
+}
+
+/* ── gantt chart builder — Longleaf Amenity Center ── */
+(function buildGantt() {
+  // Source: gantt_chart.xlsx · DunRite Construction Group
+  // Chart bounds: Aug 10 – Jan 10 (adds visual padding around Aug 15 start / Dec 15 completion)
+  var CHART_START   = new Date(2026,  7, 10); // Aug 10 2026
+  var CHART_END     = new Date(2027,  0, 10); // Jan 10 2027
+  var TOTAL_MS      = CHART_END - CHART_START;
+  var TOTAL_DAYS    = TOTAL_MS / 86400000;
+  var PROJECT_START = new Date(2026,  7, 15); // Aug 15
+  var PROJ_COMPLETE = new Date(2026, 11, 15); // Dec 15
+
+  // 5 months displayed: Aug–Dec 2026
+  var MONTH_DEFS = [
+    { label: "Aug '26", start: new Date(2026,  7, 1) },
+    { label: "Sep '26", start: new Date(2026,  8, 1) },
+    { label: "Oct '26", start: new Date(2026,  9, 1) },
+    { label: "Nov '26", start: new Date(2026, 10, 1) },
+    { label: "Dec '26", start: new Date(2026, 11, 1) },
+  ];
+
+  // Trades sourced directly from Excel (start = first colored week, end = last colored week + 7d)
+  var TRADES = [
+    // ── 02-000 · Site Work ──────────────────────────────────────────
+    { divider: '02-000 · Site Work' },
+    { csi:'16-105', name:'Temporary Power',          phase:'mep',
+      start: new Date(2026, 7,17), end: new Date(2027, 0, 4), budget:'$10,500',   dur:'100 d' },
+    { csi:'02-220', name:'Excavate & Backfill',      phase:'site',
+      start: new Date(2026, 7,17), end: new Date(2026, 7,31), budget:'$12,500',   dur:'10 d'  },
+    { csi:'02-350', name:'Piles / Foundation',       phase:'site',
+      start: new Date(2026, 7,31), end: new Date(2026, 8,21), budget:'$43,000',   dur:'15 d'  },
+
+    // ── 03 / 04 / 05 · Concrete · Masonry · Steel ──────────────────
+    { divider: '03 · 04 · 05 — Concrete · Masonry · Steel' },
+    { csi:'03-110', name:'Structural Concrete',      phase:'structure',
+      start: new Date(2026, 7,24), end: new Date(2026, 9, 5), budget:'$30,000',   dur:'20 d'  },
+    { csi:'04-220', name:'Concrete Unit Masonry',    phase:'structure',
+      start: new Date(2026, 8,14), end: new Date(2026, 9,19), budget:'$30,500',   dur:'20 d'  },
+    { csi:'05-120', name:'Structural Steel',         phase:'structure',
+      start: new Date(2026, 7,31), end: new Date(2026, 9,19), budget:'$20,000',   dur:'20 d'  },
+
+    // ── 13-000 · Special Construction ──────────────────────────────
+    { divider: '13-000 · Special Construction' },
+    { csi:'13-155', name:'Swimming Pool',            phase:'special',
+      start: new Date(2026, 7,31), end: new Date(2027, 0, 4), budget:'$477,939',  dur:'90 d'  },
+    { csi:'13-200', name:'Mail Boxes',               phase:'special',
+      start: new Date(2026,10,30), end: new Date(2026,11,28), budget:'$15,000',   dur:'20 d'  },
+
+    // ── 15 / 16 · Mechanical · Electrical ──────────────────────────
+    { divider: '15 · 16 — Mechanical · Electrical' },
+    { csi:'15-100', name:'Plumbing',                 phase:'mep',
+      start: new Date(2026, 8,14), end: new Date(2027, 0, 4), budget:'$17,500',   dur:'45 d'  },
+    { csi:'15-500', name:'HVAC',                     phase:'mep',
+      start: new Date(2026, 9,12), end: new Date(2027, 0, 4), budget:'$22,500',   dur:'45 d'  },
+    { csi:'16-100', name:'Electrical Sub',           phase:'mep',
+      start: new Date(2026, 7,17), end: new Date(2027, 0, 4), budget:'$52,993',   dur:'100 d' },
+
+    // ── 06-000 · Wood & Plastics ─────────────────────────────────────
+    { divider: '06-000 · Wood & Plastics' },
+    { csi:'06-110', name:'Rough Framing',            phase:'framing',
+      start: new Date(2026, 9,12), end: new Date(2026,10,23), budget:'$19,500',   dur:'30 d'  },
+    { csi:'06-400', name:'Exterior Arch. Woodwork',  phase:'framing',
+      start: new Date(2026,10,16), end: new Date(2026,11,21), budget:'$18,000',   dur:'15 d'  },
+    { csi:'06-410', name:'Custom Millwork / Cabinets',phase:'framing',
+      start: new Date(2026,10,23), end: new Date(2027, 0, 4), budget:'$7,500',    dur:'15 d'  },
+    { csi:'06-410', name:'Toilet Stalls',            phase:'framing',
+      start: new Date(2026,10,23), end: new Date(2027, 0, 4), budget:'$13,438',   dur:'15 d'  },
+
+    // ── 07-000 · Thermal & Moisture ──────────────────────────────────
+    { divider: '07-000 · Thermal & Moisture Protection' },
+    { csi:'07-310', name:'Shingles & Copper Flashing',phase:'exterior',
+      start: new Date(2026,10,16), end: new Date(2026,11, 7), budget:'$24,000',   dur:'15 d'  },
+    { csi:'07-200', name:'Spray-In Insulation',      phase:'exterior',
+      start: new Date(2026,10,23), end: new Date(2026,11, 1), budget:'$8,436',    dur:'4 d'   },
+
+    // ── 08-000 · Doors & Windows ─────────────────────────────────────
+    { divider: '08-000 · Doors & Windows' },
+    { csi:'08-610', name:'Exterior Doors & Windows', phase:'exterior',
+      start: new Date(2026,10,23), end: new Date(2026,11, 1), budget:'$21,500',   dur:'4 d'   },
+
+    // ── 09-000 · Finishes ────────────────────────────────────────────
+    { divider: '09-000 · Finishes' },
+    { csi:'09-220', name:'Stucco',                   phase:'finishes',
+      start: new Date(2026,10,30), end: new Date(2026,11,21), budget:'$15,690',   dur:'15 d'  },
+    { csi:'09-250', name:'Drywall & Bat. Insulation',phase:'finishes',
+      start: new Date(2026,10,30), end: new Date(2026,11,14), budget:'$6,500',    dur:'10 d'  },
+    { csi:'09-310', name:'Floor & Wall Tile',         phase:'finishes',
+      start: new Date(2026, 9,19), end: new Date(2027, 0, 4), budget:'$21,250',   dur:'30 d'  },
+    { csi:'09-370', name:'Countertops',              phase:'finishes',
+      start: new Date(2026,10, 2), end: new Date(2027, 0, 4), budget:'$8,500',    dur:'15 d'  },
+    { csi:'09-900', name:'Painting Int/Ext.',         phase:'finishes',
+      start: new Date(2026,10,23), end: new Date(2027, 0, 4), budget:'$12,500',   dur:'15 d'  },
+
+    // ── 10-000 · Specialties ─────────────────────────────────────────
+    { divider: '10-000 · Specialties' },
+    { csi:'10-810', name:'Toilet & Bath Accessories',phase:'finishes',
+      start: new Date(2026,11, 7), end: new Date(2027, 0, 4), budget:'$8,750',    dur:'5 d'   },
+
+    // ── 02-900 · Site Finishes ────────────────────────────────────────
+    { divider: '02-900 · Site Finishes' },
+    { csi:'02-900', name:'Fencing',                  phase:'site',
+      start: new Date(2026,10, 9), end: new Date(2026,10,23), budget:'$36,500',   dur:'10 d'  },
+    { csi:'02-900', name:'Landscaping',              phase:'site',
+      start: new Date(2026,10, 9), end: new Date(2026,11,14), budget:'$63,000',   dur:'25 d'  },
+    { csi:'02-900', name:'Pavers',                   phase:'site',
+      start: new Date(2026,10,23), end: new Date(2027, 0, 4), budget:'$30,000',   dur:'10 d'  },
+  ];
+
+  var PHASE_COLOR = {
+    site:      'p-site',
+    structure: 'p-structure',
+    special:   'p-special',
+    mep:       'p-mep',
+    framing:   'p-framing',
+    exterior:  'p-exterior',
+    finishes:  'p-finishes',
+  };
+
+  function offset(d) { return (d - CHART_START) / TOTAL_MS; }
+  function toL(d)    { return (Math.max(0, offset(d)) * 100).toFixed(2) + '%'; }
+  function toR(d)    { return (Math.max(0, 1 - offset(d)) * 100).toFixed(2) + '%'; }
+
+  // ── Month headers ────────────────────────────────────────────────
+  var mDiv = document.getElementById('ganttMonths');
+  MONTH_DEFS.forEach(function(m, i) {
+    var nextStart = i + 1 < MONTH_DEFS.length ? MONTH_DEFS[i+1].start : CHART_END;
+    var el = document.createElement('div');
+    el.className = 'gantt-month';
+    el.textContent = m.label;
+    el.style.left  = toL(m.start);
+    el.style.width = ((nextStart - m.start) / TOTAL_MS * 100).toFixed(2) + '%';
+    mDiv.appendChild(el);
+  });
+
+  // ── Rows ─────────────────────────────────────────────────────────
+  var gantt = document.getElementById('ganttChart');
+
+  TRADES.forEach(function(p) {
+    if (p.divider) {
+      var h = document.createElement('div');
+      h.className = 'gantt-phase-hdr';
+      h.textContent = p.divider;
+      var ht = document.createElement('div');
+      ht.className = 'gantt-phase-track';
+      // Draw project-start & completion lines on every phase track too
+      [PROJECT_START, PROJ_COMPLETE].forEach(function(d, i) {
+        var mk = document.createElement('div');
+        mk.className = 'gantt-marker ' + (i === 0 ? 'mk-start' : 'mk-end');
+        mk.style.left = toL(d);
+        ht.appendChild(mk);
+      });
+      gantt.appendChild(h);
+      gantt.appendChild(ht);
+      return;
+    }
+
+    var lbl = document.createElement('div');
+    lbl.className = 'gantt-label';
+    lbl.innerHTML =
+      '<div class="gl-name">' + p.name + '</div>' +
+      '<div class="gl-type"><span class="gl-csi">' + p.csi + '</span>' + p.budget + ' · ' + p.dur + '</div>';
+
+    var track = document.createElement('div');
+    track.className = 'gantt-track';
+
+    var bar = document.createElement('div');
+    bar.className = 'gantt-bar ' + (PHASE_COLOR[p.phase] || 'p-site');
+    bar.style.left  = toL(p.start);
+    bar.style.right = toR(p.end);
+    bar.innerHTML   = '<span class="gb-label">' + p.name + ' — ' + p.dur + '</span>';
+    bar.title       = p.csi + ' · ' + p.name + ' · ' + p.budget + ' · ' + p.dur;
+    track.appendChild(bar);
+
+    // Project start & completion diamonds
+    [{ d: PROJECT_START, cls: 'ms-start', lbl: 'Project Start — Aug 15' },
+     { d: PROJ_COMPLETE, cls: 'ms-final', lbl: 'Substantial Completion — Dec 15' }
+    ].forEach(function(mk) {
+      if (mk.d >= p.start && mk.d <= p.end) {
+        var m = document.createElement('div');
+        m.className = 'gantt-milestone ' + mk.cls;
+        m.style.left = toL(mk.d);
+        m.title = mk.lbl;
+        track.appendChild(m);
+      }
+    });
+
+    gantt.appendChild(lbl);
+    gantt.appendChild(track);
+  });
+})();
+
+<!-- Project Details & Dropbox Modal -->
+<div class="pc-modal-overlay" id="projectModal">
+  <div class="pc-modal">
+    <div class="pc-modal-header">
+      <div>
+        <div class="pc-modal-title" id="modalProjName">Lakewood Reserve — Phase 2</div>
+        <div class="pc-modal-subtitle" id="modalProjSub">48-unit shell package · Hernando</div>
+      </div>
+      <button class="pc-modal-close" onclick="closeProjectModal()">&times;</button>
+    </div>
+    <div class="pc-modal-tabs">
+      <button class="pc-modal-tab active" onclick="switchModalTab('overview')">Project Overview</button>
+      <button class="pc-modal-tab" onclick="switchModalTab('dropbox')">Dropbox Documents</button>
+    </div>
+    <div class="pc-modal-body">
+      <!-- Overview Tab -->
+      <div class="pc-tab-content active" id="tab-overview">
+        <div class="pc-overview-grid">
+          <div class="pc-info-panel">
+            <h4>Contract Details</h4>
+            <div class="pc-info-row"><span class="lbl">Contract Value</span><span class="val" id="modalProjVal">$680K</span></div>
+            <div class="pc-info-row"><span class="lbl">CSI Division</span><span class="val" id="modalProjType">Shell Pkg</span></div>
+            <div class="pc-info-row"><span class="lbl">County Served</span><span class="val" id="modalProjCounty">Hernando</span></div>
+            <div class="pc-info-row"><span class="lbl">Project Manager</span><span class="val" id="modalProjPM">Gator Wilcox</span></div>
+          </div>
+          <div class="pc-info-panel">
+            <h4>Execution & Status</h4>
+            <div class="pc-info-row"><span class="lbl">Current Status</span><span class="val" id="modalProjStatus">In Progress</span></div>
+            <div class="pc-info-row"><span class="lbl">Timeline</span><span class="val" id="modalProjSchedule">Mar 3 – Aug 14</span></div>
+            <div class="pc-info-row"><span class="lbl">Work Completed</span><span class="val" id="modalProjProgress">62%</span></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dropbox Tab -->
+      <div class="pc-tab-content" id="tab-dropbox">
+        <div class="db-status-bar">
+          <div class="db-info">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 2L1 5.5L6 9L11 5.5L6 2Z" fill="#0061FE"/>
+              <path d="M18 2L13 5.5L18 9L23 5.5L18 2Z" fill="#0061FE"/>
+              <path d="M1 12.5L6 9L11 12.5L6 16L1 12.5Z" fill="#0061FE"/>
+              <path d="M23 12.5L18 9L13 12.5L18 16L23 12.5Z" fill="#0061FE"/>
+              <path d="M6 17L12 21L18 17L12 13L6 17Z" fill="#0061FE"/>
+            </svg>
+            <div>
+              <div class="db-status-lbl">Dropbox Directory Connected</div>
+              <div class="db-status-path" id="dbFolderPath">/DunRite Projects/Hernando/Lakewood Reserve Ph2</div>
+            </div>
+          </div>
+          <button class="db-sync-btn" id="dbSyncBtn" onclick="syncDropboxFolder()">
+            <svg id="syncIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+            <span>Sync</span>
+          </button>
+        </div>
+        
+        <div class="db-file-list" id="dbFileList">
+          <!-- Files dynamically rendered here -->
+        </div>
+        
+        <div class="db-toolbar">
+          <button class="btn btn-accent" style="padding: 10px 20px; font-size: 11px;" onclick="openDropboxChooser()">
+            Add Files from Dropbox
+          </button>
+          <a href="https://www.dropbox.com" target="_blank" class="btn btn-ghost" style="padding: 10px 20px; font-size: 11px; border-color: rgba(255,255,255,0.15)">
+            Open in Dropbox
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mock Dropbox Chooser Pop-up -->
+<div class="db-chooser-overlay" id="dbChooserModal">
+  <div class="db-chooser">
+    <div class="db-chooser-hdr">
+      <div class="db-chooser-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 2L1 5.5L6 9L11 5.5L6 2Z" fill="#fff"/>
+          <path d="M18 2L13 5.5L18 9L23 5.5L18 2Z" fill="#fff"/>
+          <path d="M1 12.5L6 9L11 12.5L6 16L1 12.5Z" fill="#fff"/>
+          <path d="M23 12.5L18 9L13 12.5L18 16L23 12.5Z" fill="#fff"/>
+          <path d="M6 17L12 21L18 17L12 13L6 17Z" fill="#fff"/>
+        </svg>
+        <span>Dropbox Chooser</span>
+      </div>
+      <button class="db-chooser-close" onclick="closeDropboxChooser()">&times;</button>
+    </div>
+    <div class="db-chooser-folder-path">Dropbox &gt; DunRite Shares &gt; Documents &gt; Plans</div>
+    <div class="db-chooser-body">
+      <div class="db-chooser-list" id="dbChooserList">
+        <!-- Mock files to choose from -->
+      </div>
+    </div>
+    <div class="db-chooser-ftr">
+      <button class="db-c-btn cancel" onclick="closeDropboxChooser()">Cancel</button>
+      <button class="db-c-btn choose" id="dbChooserSubmit" disabled onclick="submitDropboxSelection()">Choose (0)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var PROJECTS_DATA = {
+  "Lakewood Reserve — Phase 2": {
+    name: "Lakewood Reserve — Phase 2",
+    sub: "48-unit shell package · Hernando",
+    type: "Shell Pkg",
+    county: "Hernando",
+    val: "$680K",
+    schedule: "Mar 3 – Aug 14",
+    progress: "62%",
+    status: "In Progress",
+    statusClass: "active",
+    pm: "Gator Wilcox",
+    dropboxPath: "/DunRite Projects/Hernando/Lakewood Reserve Ph2",
+    files: [
+      { name: "blueprints_rev2_approved.pdf", date: "2026-03-05", size: "14.2 MB", type: "pdf" },
+      { name: "foundation_pour_signoff.pdf", date: "2026-04-12", size: "1.8 MB", type: "pdf" },
+      { name: "truss_delivery_manifest.xlsx", date: "2026-05-18", size: "840 KB", type: "excel" },
+      { name: "site_photo_block_walls.jpg", date: "2026-06-10", size: "3.4 MB", type: "image" }
+    ]
+  },
+  "Summertree Developer Slab": {
+    name: "Summertree Developer Slab",
+    sub: "32 slab pours · Pasco County",
+    type: "Slabs",
+    county: "Pasco",
+    val: "$310K",
+    schedule: "Apr 1 – Jun 30",
+    progress: "84%",
+    status: "In Progress",
+    statusClass: "active",
+    pm: "David Miller",
+    dropboxPath: "/DunRite Projects/Pasco/Summertree Slabs",
+    files: [
+      { name: "slab_pour_schedule.pdf", date: "2026-03-28", size: "1.2 MB", type: "pdf" },
+      { name: "lot_survey_drawings.pdf", date: "2026-04-02", size: "8.6 MB", type: "pdf" },
+      { name: "pour_manifest_lots_1_12.xlsx", date: "2026-05-15", size: "320 KB", type: "excel" }
+    ]
+  },
+  "Citrus Highlands — Custom Shell": {
+    name: "Citrus Highlands — Custom Shell",
+    sub: "4,200 sq ft custom home",
+    type: "Custom Shell",
+    county: "Citrus",
+    val: "$195K",
+    schedule: "May 5 – Sep 20",
+    progress: "31%",
+    status: "In Progress",
+    statusClass: "active",
+    pm: "Colin Vance",
+    dropboxPath: "/DunRite Projects/Citrus/Highlands Custom Shell",
+    files: [
+      { name: "architectural_plans.pdf", date: "2026-04-20", size: "18.4 MB", type: "pdf" },
+      { name: "permits_citrus_county.pdf", date: "2026-05-02", size: "2.1 MB", type: "pdf" }
+    ]
+  },
+  "Suncoast Villas — Block & Concrete": {
+    name: "Suncoast Villas — Block & Concrete",
+    sub: "Developer grade · 60 units",
+    type: "Dev Concrete",
+    county: "Hillsborough",
+    val: "$1.12M",
+    schedule: "Jan 15 – Oct 1",
+    progress: "47%",
+    status: "In Progress",
+    statusClass: "active",
+    pm: "Michael E. Chandler",
+    dropboxPath: "/DunRite Projects/Hillsborough/Suncoast Villas Concrete",
+    files: [
+      { name: "civil_site_plans.pdf", date: "2026-01-08", size: "24.5 MB", type: "pdf" },
+      { name: "concrete_mix_design_approval.pdf", date: "2026-01-20", size: "3.2 MB", type: "pdf" },
+      { name: "subcontractor_agreement.pdf", date: "2026-02-02", size: "4.8 MB", type: "pdf" }
+    ]
+  },
+  "Marion Oaks Estate Shells": {
+    name: "Marion Oaks Estate Shells",
+    sub: "8 custom shells · gated community",
+    type: "Shell Pkg",
+    county: "Marion",
+    val: "$540K",
+    schedule: "Starts Jul 7",
+    progress: "0%",
+    status: "Bid Awarded",
+    statusClass: "bid",
+    pm: "Gator Wilcox",
+    dropboxPath: "/DunRite Projects/Marion/Oaks Estate Shells",
+    files: [
+      { name: "proposal_final_signed.pdf", date: "2026-06-01", size: "2.8 MB", type: "pdf" }
+    ]
+  },
+  "Lake County Mixed-Use Slab": {
+    name: "Lake County Mixed-Use Slab",
+    sub: "Commercial grade · 18,000 sq ft",
+    type: "Slabs",
+    county: "Lake",
+    val: "$225K",
+    schedule: "Starts Jul 21",
+    progress: "0%",
+    status: "Pending Start",
+    statusClass: "pending",
+    pm: "Colin Vance",
+    dropboxPath: "/DunRite Projects/Lake/Commercial Mixed Use",
+    files: [
+      { name: "bid_specs_structural.pdf", date: "2026-05-20", size: "6.4 MB", type: "pdf" }
+    ]
+  },
+  "Polk Commons — Phase 1": {
+    name: "Polk Commons — Phase 1",
+    sub: "Developer hold · permit delay",
+    type: "Dev Concrete",
+    county: "Polk",
+    val: "$890K",
+    schedule: "TBD",
+    progress: "0%",
+    status: "On Hold",
+    statusClass: "hold",
+    pm: "David Miller",
+    dropboxPath: "/DunRite Projects/Polk/Commons Phase 1",
+    files: [
+      { name: "permit_application_status.pdf", date: "2026-02-15", size: "1.1 MB", type: "pdf" }
+    ]
+  }
+};
+
+var currentProjectName = "";
+
+function openProjectModal(name) {
+  var proj = PROJECTS_DATA[name];
+  if (!proj) return;
+  currentProjectName = name;
+  
+  // Set text
+  document.getElementById("modalProjName").textContent = proj.name;
+  document.getElementById("modalProjSub").textContent = proj.sub;
+  document.getElementById("modalProjVal").textContent = proj.val;
+  document.getElementById("modalProjType").textContent = proj.type;
+  document.getElementById("modalProjCounty").textContent = proj.county;
+  document.getElementById("modalProjPM").textContent = proj.pm;
+  document.getElementById("modalProjStatus").textContent = proj.status;
+  document.getElementById("modalProjSchedule").textContent = proj.schedule;
+  document.getElementById("modalProjProgress").textContent = proj.progress;
+  document.getElementById("dbFolderPath").textContent = proj.dropboxPath;
+  
+  // Render files
+  renderFilesList();
+  
+  // Open modal
+  document.getElementById("projectModal").classList.add("open");
+  switchModalTab("overview");
+}
+
+function closeProjectModal() {
+  document.getElementById("projectModal").classList.remove("open");
+}
+
+function switchModalTab(tabName) {
+  document.querySelectorAll(".pc-modal-tab").forEach(function(tab) {
+    var isTarget = tab.getAttribute("onclick").includes("'" + tabName + "'");
+    tab.classList.toggle("active", isTarget);
+  });
+  document.querySelectorAll(".pc-tab-content").forEach(function(content) {
+    content.classList.toggle("active", content.id === "tab-" + tabName);
+  });
+}
+
+function renderFilesList() {
+  var proj = PROJECTS_DATA[currentProjectName];
+  var list = document.getElementById("dbFileList");
+  list.innerHTML = "";
+  
+  if (!proj.files || proj.files.length === 0) {
+    list.innerHTML = '<div class="db-empty">No documents currently linked from Dropbox.</div>';
+    return;
+  }
+  
+  proj.files.forEach(function(file, idx) {
+    var iconSvg = "";
+    if (file.type === "pdf") {
+      iconSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#e05252" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>';
+    } else if (file.type === "excel") {
+      iconSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#4caf6e" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 12h8M8 16h8"/></svg>';
+    } else if (file.type === "image") {
+      iconSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#f4a01e" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>';
+    } else {
+      iconSvg = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#9ba0a5" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+    }
+    
+    var row = document.createElement("div");
+    row.className = "db-file-row";
+    row.innerHTML = 
+      '<div class="db-file-icon">' + iconSvg + '</div>' +
+      '<div>' +
+        '<div class="db-file-name">' + file.name + '</div>' +
+        '<div class="db-file-meta">Uploaded on ' + file.date + '</div>' +
+      '</div>' +
+      '<div class="db-file-size">' + file.size + '</div>' +
+      '<div class="db-file-actions">' +
+        '<button class="db-action-btn" title="Download" onclick="downloadFile(' + idx + ')">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>' +
+        '</button>' +
+        '<button class="db-action-btn delete" title="Unlink File" onclick="unlinkFile(' + idx + ')">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>' +
+        '</button>' +
+      '</div>';
+    list.appendChild(row);
+  });
+}
+
+function syncDropboxFolder() {
+  var syncBtn = document.getElementById("dbSyncBtn");
+  var syncIcon = document.getElementById("syncIcon");
+  
+  syncBtn.disabled = true;
+  syncIcon.classList.add("db-icon-spin");
+  
+  // Simulate sync delay
+  setTimeout(function() {
+    syncIcon.classList.remove("db-icon-spin");
+    syncBtn.disabled = false;
+    
+    // Update date to today
+    var proj = PROJECTS_DATA[currentProjectName];
+    var today = new Date().toISOString().split("T")[0];
+    if (proj.files.length > 0) {
+      proj.files[0].date = today;
+      renderFilesList();
+    }
+    
+    alert("Dropbox sync complete: " + proj.files.length + " files up to date.");
+  }, 1200);
+}
+
+function unlinkFile(idx) {
+  if (confirm("Are you sure you want to unlink this file from the project? The file will remain in Dropbox but will no longer be visible here.")) {
+    var proj = PROJECTS_DATA[currentProjectName];
+    proj.files.splice(idx, 1);
+    renderFilesList();
+  }
+}
+
+function downloadFile(idx) {
+  var proj = PROJECTS_DATA[currentProjectName];
+  alert("Downloading '" + proj.files[idx].name + "' from Dropbox...");
+}
+
+var CHOOSER_FILES = [
+  { name: "safety_guidelines_2026.pdf", size: "1.4 MB", type: "pdf" },
+  { name: "material_delivery_slip.pdf", size: "750 KB", type: "pdf" },
+  { name: "excavation_inspection_signoff.pdf", size: "1.8 MB", type: "pdf" },
+  { name: "survey_report_site_v3.pdf", size: "4.2 MB", type: "pdf" },
+  { name: "contract_revision_v2.pdf", size: "2.4 MB", type: "pdf" },
+  { name: "as_built_drawings_draft.pdf", size: "8.6 MB", type: "pdf" }
+];
+var selectedChooserIndexes = [];
+
+function openDropboxChooser() {
+  selectedChooserIndexes = [];
+  document.getElementById("dbChooserSubmit").disabled = true;
+  document.getElementById("dbChooserSubmit").textContent = "Choose (0)";
+  
+  var list = document.getElementById("dbChooserList");
+  list.innerHTML = "";
+  
+  CHOOSER_FILES.forEach(function(file, idx) {
+    var iconSvg = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#0061fe" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+    var item = document.createElement("div");
+    item.className = "db-chooser-item";
+    item.dataset.index = idx;
+    item.innerHTML = 
+      '<div class="db-chooser-checkbox"></div>' +
+      iconSvg +
+      '<div class="db-chooser-item-name">' + file.name + '</div>' +
+      '<div class="db-chooser-item-size">' + file.size + '</div>';
+      
+    item.addEventListener("click", function() {
+      var sIdx = selectedChooserIndexes.indexOf(idx);
+      if (sIdx > -1) {
+        selectedChooserIndexes.splice(sIdx, 1);
+        item.classList.remove("selected");
+      } else {
+        selectedChooserIndexes.push(idx);
+        item.classList.add("selected");
+      }
+      
+      var count = selectedChooserIndexes.length;
+      var submitBtn = document.getElementById("dbChooserSubmit");
+      submitBtn.disabled = count === 0;
+      submitBtn.textContent = "Choose (" + count + ")";
+    });
+    
+    list.appendChild(item);
+  });
+  
+  document.getElementById("dbChooserModal").classList.add("open");
+}
+
+function closeDropboxChooser() {
+  document.getElementById("dbChooserModal").classList.remove("open");
+}
+
+function submitDropboxSelection() {
+  var proj = PROJECTS_DATA[currentProjectName];
+  var today = new Date().toISOString().split("T")[0];
+  
+  selectedChooserIndexes.forEach(function(idx) {
+    var chosen = CHOOSER_FILES[idx];
+    var exists = proj.files.some(function(f) { return f.name === chosen.name; });
+    if (!exists) {
+      proj.files.push({
+        name: chosen.name,
+        date: today,
+        size: chosen.size,
+        type: chosen.type
+      });
+    }
+  });
+  
+  renderFilesList();
+  closeDropboxChooser();
+}
+
+/* ── reveal on scroll ── */
+(function() {
+  var io = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.reveal').forEach(function(el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>
