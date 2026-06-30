@@ -1655,6 +1655,7 @@ function applyFilters(q) {
     gantt.appendChild(track);
   });
 })();
+</script>
 
 <!-- Project Details & Dropbox Modal -->
 <div class="pc-modal-overlay" id="projectModal">
@@ -1667,8 +1668,8 @@ function applyFilters(q) {
       <button class="pc-modal-close" onclick="closeProjectModal()">&times;</button>
     </div>
     <div class="pc-modal-tabs">
-      <button class="pc-modal-tab active" onclick="switchModalTab('overview')">Project Overview</button>
-      <button class="pc-modal-tab" onclick="switchModalTab('dropbox')">Dropbox Documents</button>
+      <button class="pc-modal-tab active" data-tab="overview" onclick="switchModalTab('overview')">Project Overview</button>
+      <button class="pc-modal-tab" data-tab="dropbox" onclick="switchModalTab('dropbox')">Dropbox Documents</button>
     </div>
     <div class="pc-modal-body">
       <!-- Overview Tab -->
@@ -1906,16 +1907,18 @@ function openProjectModal(name) {
   
   // Open modal
   document.getElementById("projectModal").classList.add("open");
+  document.body.style.overflow = "hidden";
   switchModalTab("overview");
 }
 
 function closeProjectModal() {
   document.getElementById("projectModal").classList.remove("open");
+  document.body.style.overflow = "";
 }
 
 function switchModalTab(tabName) {
   document.querySelectorAll(".pc-modal-tab").forEach(function(tab) {
-    var isTarget = tab.getAttribute("onclick").includes("'" + tabName + "'");
+    var isTarget = tab.getAttribute("data-tab") === tabName;
     tab.classList.toggle("active", isTarget);
   });
   document.querySelectorAll(".pc-tab-content").forEach(function(content) {
@@ -2078,6 +2081,34 @@ function submitDropboxSelection() {
   renderFilesList();
   closeDropboxChooser();
 }
+
+// Close modals on overlay background click
+document.getElementById("projectModal").addEventListener("click", function(event) {
+  if (event.target === this) {
+    closeProjectModal();
+  }
+});
+
+document.getElementById("dbChooserModal").addEventListener("click", function(event) {
+  if (event.target === this) {
+    closeDropboxChooser();
+  }
+});
+
+// Close modals on Escape keypress
+document.addEventListener("keydown", function(event) {
+  if (event.key === "Escape") {
+    var dbChooser = document.getElementById("dbChooserModal");
+    if (dbChooser && dbChooser.classList.contains("open")) {
+      closeDropboxChooser();
+    } else {
+      var projModal = document.getElementById("projectModal");
+      if (projModal && projModal.classList.contains("open")) {
+        closeProjectModal();
+      }
+    }
+  }
+});
 
 /* ── reveal on scroll ── */
 (function() {
