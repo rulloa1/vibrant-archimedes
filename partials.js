@@ -24,13 +24,13 @@
     '<a class="crosslink u-hide" href="https://www.drchomesfl.com/" target="_blank" rel="noopener">Need remodeling? Visit DRC Homes \u2192</a>' +
     "</div></div>" +
     '<header class="header"><div class="wrap">' +
-    '<a class="brand" href="index.html" aria-label="DunRite Construction Group"><img src="' + LOGO + '" alt="DunRite Construction Group" /></a>' +
+    '<a class="brand" href="index.html" aria-label="DunRite Construction Group"><img src="' + LOGO + '" width="62" height="40" alt="DunRite Construction Group" /></a>' +
     '<nav class="nav">' + navHTML("") + "</nav><span class=\"spacer\"></span>" +
     '<div class="cta-wrap"><a class="phone" href="tel:3525884050">(352) 588-4050</a>' +
     '<a class="btn btn-accent" href="contact.html">Get a Quote <span class="arr">\u2192</span></a></div>' +
     '<button class="burger" id="burger" aria-label="Open menu"><span></span></button>' +
     "</div></header>" +
-    '<div class="drawer" id="drawer"><div class="d-top"><img src="' + LOGO + '" alt="DunRite" />' +
+    '<div class="drawer" id="drawer"><div class="d-top"><img src="' + LOGO + '" width="59" height="38" alt="DunRite" />' +
     '<button class="close" id="drawerClose" aria-label="Close menu">\u00d7</button></div>' +
     '<nav>' + navHTML("") + '</nav>' +
     '<div class="d-cta"><a class="btn btn-accent" href="tel:3525884050">Call (352) 588-4050</a>' +
@@ -38,7 +38,7 @@
 
   var footer =
     '<footer class="footer"><div class="wrap"><div class="foot-grid">' +
-    '<div class="f-brand"><img src="' + LOGO + '" alt="DunRite Construction Group" />' +
+    '<div class="f-brand"><img src="' + LOGO + '" width="66" height="42" alt="DunRite Construction Group" />' +
     "<p>A Florida-based shell and concrete contractor with over 25 years of experience. From slabs to full shells, we're the one-call partner for developers, builders, and homeowners who demand it done right.</p>" +
     '<div class="areas" style="margin-top:22px;"><span>Citrus</span><span>Hernando</span><span>Hillsborough</span><span>Lake</span><span>Manatee</span><span>Marion</span><span>Pasco</span><span>Pinellas</span><span>Polk</span><span>Sumter</span></div></div>' +
     '<div><h5>Quick Links</h5><ul><li><a href="about.html">About</a></li><li><a href="services.html">Services</a></li><li><a href="projects.html">Past Projects</a></li><li><a href="contact.html">Contact Us</a></li></ul></div>' +
